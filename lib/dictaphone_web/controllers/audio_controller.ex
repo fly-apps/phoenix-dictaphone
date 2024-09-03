@@ -6,8 +6,7 @@ defmodule DictaphoneWeb.AudioController do
 
   def get(conn, %{"name" => name}) do
     request = ExAws.S3.get_object(System.get_env("BUCKET_NAME"), name)
-    response = request |> ExAws.request()
-    case response do
+    case request |> ExAws.request() do
       {:ok, %{body: body, headers: headers}} ->
         headers = headers |> Enum.into(%{})
         conn
