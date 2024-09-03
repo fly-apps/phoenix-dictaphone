@@ -1,0 +1,24 @@
+<.header>
+  Listing Clips
+  <:actions>
+    <.link href={~p"/clips/new"}>
+      <.button>New Clip</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table id="clips" rows={@clips} row_click={&JS.navigate(~p"/clips/#{&1}")}>
+  <:col :let={clip} label="Name"><%= clip.name %></:col>
+  <:col :let={clip} label="Text"><%= clip.text %></:col>
+  <:action :let={clip}>
+    <div class="sr-only">
+      <.link navigate={~p"/clips/#{clip}"}>Show</.link>
+    </div>
+    <.link navigate={~p"/clips/#{clip}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={clip}>
+    <.link href={~p"/clips/#{clip}"} method="delete" data-confirm="Are you sure?">
+      Delete
+    </.link>
+  </:action>
+</.table>

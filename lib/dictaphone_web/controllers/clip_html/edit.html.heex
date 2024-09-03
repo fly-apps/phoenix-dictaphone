@@ -1,0 +1,8 @@
+<.header>
+  Edit Clip <%= @clip.id %>
+  <:subtitle>Use this form to manage clip records in your database.</:subtitle>
+</.header>
+
+<.clip_form changeset={@changeset} action={~p"/clips/#{@clip}"} />
+
+<.back navigate={~p"/clips"}>Back to clips</.back>

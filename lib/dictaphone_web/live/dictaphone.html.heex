@@ -1,0 +1,44 @@
+<div class="wrapper" id="dictaphone">
+  <header>
+    <h1>Web dictaphone</h1>
+  </header>
+
+  <section class="main-controls">
+    <canvas class="visualizer" height="60px"></canvas>
+    <div id="buttons">
+      <button class="record">Record</button>
+      <button class="stop">Stop</button>
+    </div>
+  </section>
+
+  <section class="sound-clips">
+    <%= for clip <- @clips do %>
+      <article class="clip">
+        <audio controls src={"/audio/" <> URI.encode(clip.name)} preload="none"></audio>
+        <p phx-hook="Rename" id={"clip-" <> Integer.to_string(clip.id)}><%= clip.name %></p>
+        <button class="delete" phx-click="delete_clip" phx-value-id={clip.id}>Delete</button>
+        <p class="text"><%= clip.text %></p>
+      </article>
+    <% end %>
+  </section>
+</div>
+
+<label for="toggle">❔</label>
+<input type="checkbox" id="toggle" />
+<aside>
+  <h2>Information</h2>
+
+  <p>
+    Web dictaphone is built using
+    <a href="https://developer.mozilla.org/en-US/docs/Web/API/Navigator.getUserMedia">
+      getUserMedia
+    </a>
+    and the <a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder_API">MediaRecorder API</a>, which provides an easier way to capture Media streams.
+  </p>
+
+  <p>
+    Icon courtesy of <a href="http://findicons.com/search/microphone">Find Icons</a>. Thanks to
+    <a href="http://soledadpenades.com/">Sole</a>
+    for the Oscilloscope code!
+  </p>
+</aside>

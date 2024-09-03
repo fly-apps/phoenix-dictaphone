@@ -1,0 +1,16 @@
+<.header>
+  Clip <%= @clip.id %>
+  <:subtitle>This is a clip record from your database.</:subtitle>
+  <:actions>
+    <.link href={~p"/clips/#{@clip}/edit"}>
+      <.button>Edit clip</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Name"><%= @clip.name %></:item>
+  <:item title="Text"><%= @clip.text %></:item>
+</.list>
+
+<.back navigate={~p"/clips"}>Back to clips</.back>
