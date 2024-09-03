@@ -28,6 +28,7 @@ defmodule DictaphoneWeb.Router do
   # end
 
   scope "/audio", DictaphoneWeb do
+    get "/:name", AudioController, :get
     put "/:name", AudioController, :put
   end
 

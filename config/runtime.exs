@@ -115,3 +115,17 @@ if config_env() == :prod do
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
 end
+
+# Configure S3 client for access to Tigris
+config :ex_aws,
+  debug_requests: true,
+  json_codec: Jason,
+  access_key_id: {:system, "AWS_ACCESS_KEY_ID"},
+  secret_access_key: {:system, "AWS_SECRET_ACCESS_KEY"}
+
+s3_endpoint = URI.parse(System.get_env("AWS_ENDPOINT_URL_S3") || "https://fly.storage.tigris.dev")
+
+config :ex_aws, :s3,
+  scheme: s3_endpoint.scheme <> "://",
+  host: s3_endpoint.host,
+  region: "auto"
