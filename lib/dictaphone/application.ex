@@ -7,11 +7,23 @@ defmodule Dictaphone.Application do
 
   @impl true
   def start(_type, _args) do
+    pubsub = case System.get_env("REDIS_URL") do
+      nil ->
+       {Phoenix.PubSub, name: Dictaphone.PubSub}
+      url ->
+       { Phoenix.PubSub,
+         name: Dictaphone.PubSub,
+         adapter: Phoenix.PubSub.Redis,
+         url: url,
+         node_name: System.get_env("NODE")
+       }
+    end
+
     children = [
       DictaphoneWeb.Telemetry,
       Dictaphone.Repo,
       {DNSCluster, query: Application.get_env(:dictaphone, :dns_cluster_query) || :ignore},
-      {Phoenix.PubSub, name: Dictaphone.PubSub},
+      pubsub,
       # Start the Finch HTTP client for sending emails
       {Finch, name: Dictaphone.Finch},
       # Start a worker by calling: Dictaphone.Worker.start_link(arg)

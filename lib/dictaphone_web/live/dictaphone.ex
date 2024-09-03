@@ -5,7 +5,6 @@ defmodule DictaphoneWeb.Dictaphone do
   alias Dictaphone.Audio
   alias DictaphoneWeb.Endpoint
 
-  @spec mount(any(), any(), Phoenix.LiveView.Socket.t()) :: {:ok, any()}
   def mount(_params, _session, socket) do
     if connected?(socket), do: Endpoint.subscribe("clips")
 
@@ -20,6 +19,7 @@ defmodule DictaphoneWeb.Dictaphone do
     clip = Audio.get_clip!(id)
     ExAws.S3.delete_object(System.get_env("BUCKET_NAME"), clip.name) |> ExAws.request()
     {:ok, _clip} = Audio.delete_clip(clip)
+    Endpoint.broadcast("clips", "clip_updated", %{})
     {:noreply, assign(socket, clips: Audio.list_clips())}
   end
 
@@ -31,6 +31,7 @@ defmodule DictaphoneWeb.Dictaphone do
       ExAws.S3.put_object_copy(bucket, name, bucket, clip.name) |> ExAws.request()
       ExAws.S3.delete_object(bucket, clip.name) |> ExAws.request()
       {:ok, _clip} = Audio.update_clip(clip, %{name: name})
+      Endpoint.broadcast("clips", "clip_updated", %{})
     end
 
     {:noreply, assign(socket, clips: Audio.list_clips())}

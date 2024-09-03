@@ -64,6 +64,8 @@ defmodule Dictaphone.MixProject do
       {:poison, "~> 3.0"},
       {:hackney, "~> 1.9"},
       {:sweet_xml, "~> 0.6.6"},
+      {:phoenix_pubsub_redis, "~> 3.0.0"},
+      {:req, "~> 0.5.0"}
     ]
   end
 

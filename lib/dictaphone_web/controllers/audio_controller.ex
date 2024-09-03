@@ -6,12 +6,15 @@ defmodule DictaphoneWeb.AudioController do
 
   def get(conn, %{"name" => name}) do
     request = ExAws.S3.get_object(System.get_env("BUCKET_NAME"), name)
+
     case request |> ExAws.request() do
       {:ok, %{body: body, headers: headers}} ->
         headers = headers |> Enum.into(%{})
+
         conn
         |> put_resp_content_type(headers["content-type"] || "application/octet-stream")
         |> Plug.Conn.send_resp(:ok, body)
+
       error ->
         conn
         |> put_status(:internal_server_error)
@@ -22,19 +25,44 @@ defmodule DictaphoneWeb.AudioController do
   def put(conn, %{"name" => name}) do
     case Audio.create_clip(%{name: name}) do
       {:ok, clip} ->
-        content_type = get_req_header(conn, "content-type") |> List.first() || "application/octet-stream"
+        content_type =
+          get_req_header(conn, "content-type") |> List.first() || "application/octet-stream"
+
         {:ok, body, conn} = Plug.Conn.read_body(conn)
 
-        request = ExAws.S3.put_object(System.get_env("BUCKET_NAME"), name, body, content_type: content_type)
+        bucket = System.get_env("BUCKET_NAME")
+        request = ExAws.S3.put_object(bucket, name, body, content_type: content_type)
         response = request |> ExAws.request()
 
         Endpoint.broadcast("clips", "clip_updated", %{})
+
+        whisper_url = System.get_env("WHISPER_URL")
+
+        if whisper_url != nil do
+          spawn(fn ->
+            {:ok, clip_url} =
+              ExAws.Config.new(:s3)
+              |> ExAws.S3.presigned_url(:get, bucket, name, expires_in: 3600)
+
+            input = %{audio: clip_url}
+
+            %{body: response} =
+              Req.put!(whisper_url,
+                headers: %{content_type: "application/json"},
+                json: %{input: input}
+              )
+
+            {:ok, _} = Audio.update_clip(clip, %{name: response["output"]["transcription"]})
+            Endpoint.broadcast("clips", "clip_updated", %{})
+          end)
+        end
 
         case response do
           {:ok, _} ->
             conn
             |> put_status(:created)
             |> json(clip)
+
           error ->
             conn
             |> put_status(:internal_server_error)
