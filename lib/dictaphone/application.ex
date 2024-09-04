@@ -15,6 +15,7 @@ defmodule Dictaphone.Application do
          name: Dictaphone.PubSub,
          adapter: Phoenix.PubSub.Redis,
          url: url,
+         socket_opts: [:inet6],
          node_name: System.get_env("NODE")
        }
     end
