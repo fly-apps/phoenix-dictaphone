@@ -48,11 +48,12 @@ defmodule DictaphoneWeb.AudioController do
 
             %{body: response} =
               Req.put!(whisper_url,
+                inet6: true,
                 headers: %{content_type: "application/json"},
                 json: %{input: input}
               )
 
-            {:ok, _} = Audio.update_clip(clip, %{name: response["output"]["transcription"]})
+            {:ok, _} = Audio.update_clip(clip, %{text: response["output"]["transcription"]})
             Endpoint.broadcast("clips", "clip_updated", %{})
           end)
         end
