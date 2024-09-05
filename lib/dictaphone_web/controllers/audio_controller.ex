@@ -9,11 +9,16 @@ defmodule DictaphoneWeb.AudioController do
 
     case request |> ExAws.request() do
       {:ok, %{body: body, headers: headers}} ->
-        headers = headers |> Enum.into(%{})
+        content_type =
+          Enum.find(
+            headers,
+            fn {name, _} -> String.downcase(name) == "content-type" end
+          )
+          |> elem(1)
 
         conn
-        |> put_resp_content_type(headers["content-type"] || "application/octet-stream")
-        |> Plug.Conn.send_resp(:ok, body)
+        |> put_resp_content_type(content_type || "application/octet-stream")
+        |> send_resp(200, body)
 
       error ->
         conn
