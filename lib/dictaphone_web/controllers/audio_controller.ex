@@ -49,7 +49,11 @@ defmodule DictaphoneWeb.AudioController do
               ExAws.Config.new(:s3)
               |> ExAws.S3.presigned_url(:get, bucket, name, expires_in: 3600)
 
-            input = %{audio: clip_url}
+            input = %{input: %{audio: clip_url}}
+
+            whisper_url = URI.parse(whisper_url)
+            |> Map.put(:path, "/predictions")
+            |> URI.to_string()
 
             %{body: response} =
               Req.put!(whisper_url,
